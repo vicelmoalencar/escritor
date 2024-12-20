@@ -6,35 +6,23 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm cache clean --force && \
-    npm install --legacy-peer-deps
+RUN npm install
 
 # Copy source code
 COPY . .
 
 # Build the app
 ENV NODE_ENV=production
-ENV CI=false
-ENV DISABLE_ESLINT_PLUGIN=true
-ENV PUBLIC_URL=/
-
 RUN npm run build
 
 # Production stage
 FROM nginx:alpine
-
-# Remove default nginx static assets
-RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built assets from builder stage
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Set permissions
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chmod -R 755 /usr/share/nginx/html
 
 # Expose port
 EXPOSE 80
