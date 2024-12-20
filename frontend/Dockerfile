@@ -4,15 +4,19 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
+# Clear npm cache
+RUN npm cache clean --force
+
 # Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
 
 # Build the app
 ENV NODE_ENV=production
+ENV CI=true
 RUN npm run build
 
 # Production stage
