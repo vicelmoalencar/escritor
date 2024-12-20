@@ -13,6 +13,8 @@ COPY . .
 
 # Build the app
 ENV NODE_ENV=production
+ENV REACT_APP_API_URL=http://escritor-api:8000
+ENV CI=false
 RUN npm run build
 
 # Production stage
