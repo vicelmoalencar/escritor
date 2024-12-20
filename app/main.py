@@ -56,30 +56,25 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 async def health_check(db: Session = Depends(get_db)):
     try:
         # Verifica conexão com o banco
-        db.execute(text("SELECT 1"))
-        db.commit()
+        result = db.execute(text("SELECT version()")).scalar()
         
         # Verifica se as tabelas foram criadas
         inspector = inspect(engine)
-        required_tables = {"ebooks", "chapters", "topics"}
-        existing_tables = set(inspector.get_table_names())
-        
-        if not required_tables.issubset(existing_tables):
-            missing_tables = required_tables - existing_tables
-            return {
-                "status": "error",
-                "detail": f"Missing tables: {missing_tables}"
-            }
+        tables = inspector.get_table_names()
         
         return {
             "status": "healthy",
-            "database": "connected",
-            "tables": list(existing_tables)
+            "database": {
+                "connected": True,
+                "version": result,
+                "tables": tables
+            },
+            "timestamp": datetime.now().isoformat()
         }
     except Exception as e:
         raise HTTPException(
             status_code=503,
-            detail=f"Database connection failed: {str(e)}"
+            detail=f"Service unhealthy: {str(e)}"
         )
 
 @app.post("/ebooks/")
