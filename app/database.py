@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
@@ -30,7 +30,9 @@ def get_engine(max_retries=5):
             engine = create_engine(DATABASE_URL, pool_pre_ping=True)
             # Testa a conexão
             with engine.connect() as conn:
-                conn.execute("SELECT 1")
+                conn.execute(text("SELECT 1"))
+                conn.commit()
+            print("Successfully connected to database!")
             return engine
         except Exception as e:
             print(f"Database connection failed: {str(e)}")
