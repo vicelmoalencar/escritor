@@ -51,6 +51,16 @@ class TopicCreate(TopicBase):
 # Configuração OpenAI
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+@app.get("/health")
+async def health_check():
+    try:
+        # Verifica conexão com o banco
+        db = next(get_db())
+        db.execute("SELECT 1")
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
+
 @app.post("/ebooks/")
 def create_ebook(ebook: EbookCreate, db: Session = Depends(get_db)):
     db_ebook = models.Ebook(title=ebook.title, description=ebook.description)
