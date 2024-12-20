@@ -1,9 +1,8 @@
 build:
   type: dockerfile
   config:
-    dockerfile: /frontend/Dockerfile
-    context: /frontend
-    target: production
+    dockerfile: Dockerfile
+    context: .
 
 deploy:
   resources:
@@ -12,7 +11,7 @@ deploy:
   port: 80
   env:
     - name: REACT_APP_API_URL
-      value: http://escritor-backend:8000
+      value: http://escritor-api:8000
     - name: NODE_ENV
       value: production
   healthCheck:
