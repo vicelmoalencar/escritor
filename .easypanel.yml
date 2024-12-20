@@ -1,13 +1,14 @@
 services:
-  - name: escritor-frontend
+  - name: escritor-web
     type: docker
     config:
       dockerfile: frontend/Dockerfile
       context: frontend
-      target: production
       buildArgs:
         - name: REACT_APP_API_URL
           value: http://escritor-backend:8000
+        - name: NODE_ENV
+          value: production
     resources:
       memory: 512Mi
       cpu: 500m
