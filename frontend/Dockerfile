@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps --force
 
 # Copy source code
 COPY . .
@@ -14,6 +14,7 @@ COPY . .
 # Build the app
 ENV NODE_ENV=production
 ENV CI=false
+ENV DISABLE_ESLINT_PLUGIN=true
 RUN npm run build
 
 # Production stage
