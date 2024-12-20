@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --force
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -15,6 +16,8 @@ COPY . .
 ENV NODE_ENV=production
 ENV CI=false
 ENV DISABLE_ESLINT_PLUGIN=true
+ENV PUBLIC_URL=/
+
 RUN npm run build
 
 # Production stage
@@ -28,6 +31,10 @@ COPY --from=builder /app/build /usr/share/nginx/html
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Set permissions
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chmod -R 755 /usr/share/nginx/html
 
 # Expose port
 EXPOSE 80
