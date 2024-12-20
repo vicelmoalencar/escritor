@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install --production --frozen-lockfile
 
 # Copy source code
 COPY . .
