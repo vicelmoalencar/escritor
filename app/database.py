@@ -28,12 +28,16 @@ def get_engine(max_retries=5):
             print(f"Using connection string: postgresql://{DB_USER}:****@{DB_HOST}:{DB_PORT}/{DB_NAME}")
             
             engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-            # Testa a conexão
-            with engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-                conn.commit()
-            print("Successfully connected to database!")
-            return engine
+            # Testa a conexão usando Session
+            SessionLocal = sessionmaker(bind=engine)
+            session = SessionLocal()
+            try:
+                session.execute(text("SELECT 1"))
+                session.commit()
+                print("Successfully connected to database!")
+                return engine
+            finally:
+                session.close()
         except Exception as e:
             print(f"Database connection failed: {str(e)}")
             if attempt == max_retries - 1:
