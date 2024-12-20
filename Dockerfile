@@ -1,30 +1,31 @@
-FROM python:3.11-slim
+# Build stage
+FROM node:18-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
-# Instalar dependências do sistema
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    curl \
-    postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+# Install dependencies
+COPY frontend/package*.json ./
+RUN npm install
 
-# Copiar e instalar requirements
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy source code
+COPY frontend/ .
 
-# Copiar o código
-COPY . .
+# Build the app
+ENV NODE_ENV=production
+RUN npm run build
 
-EXPOSE 8000
+# Production stage
+FROM nginx:alpine
 
-# Configurar health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Copy built assets from builder stage
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Usar script de inicialização com retry
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-CMD ["/start.sh"]
+# Copy nginx config
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Expose port
+EXPOSE 80
+
+# Start nginx
+CMD ["nginx", "-g", "daemon off;"]
