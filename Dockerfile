@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     python3-dev \
     libpq-dev \
     curl \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar e instalar requirements

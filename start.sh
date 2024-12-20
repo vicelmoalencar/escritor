@@ -3,15 +3,31 @@
 # Função para tentar conectar ao banco de dados
 wait_for_db() {
     echo "Waiting for database..."
-    while ! curl -s http://escritor-db:5432 >/dev/null; do
-        echo "Database is unavailable - sleeping"
-        sleep 2
+    max_attempts=30
+    counter=0
+    
+    while [ $counter -lt $max_attempts ]; do
+        if pg_isready -h escritor-db -p 5432 -U postgres; then
+            echo "Database is up - executing command"
+            return 0
+        fi
+        counter=$((counter + 1))
+        echo "Database is unavailable - attempt $counter of $max_attempts - sleeping"
+        sleep 5
     done
-    echo "Database is up - executing command"
+    
+    echo "Could not connect to database after $max_attempts attempts"
+    return 1
 }
 
 # Esperar pelo banco de dados
 wait_for_db
+
+# Se o banco de dados não estiver disponível após todas as tentativas, sair
+if [ $? -ne 0 ]; then
+    echo "Failed to connect to database. Exiting."
+    exit 1
+fi
 
 # Iniciar a aplicação com retry
 max_retries=5
