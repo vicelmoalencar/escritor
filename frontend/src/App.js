@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Layout from './components/Layout/Layout';
 import Home from './pages/Home';
+import UnderConstruction from './components/UnderConstruction';
 
 const theme = createTheme({
   palette: {
@@ -29,6 +30,10 @@ const theme = createTheme({
     },
     h3: {
       fontSize: '1.75rem',
+      fontWeight: 600,
+    },
+    h4: {
+      fontSize: '1.5rem',
       fontWeight: 600,
     },
   },
@@ -59,8 +64,8 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/create" element={<div>Criar E-book (Em desenvolvimento)</div>} />
-            <Route path="/ebooks" element={<div>Meus E-books (Em desenvolvimento)</div>} />
+            <Route path="/create" element={<UnderConstruction />} />
+            <Route path="/ebooks" element={<UnderConstruction />} />
           </Routes>
         </Layout>
       </Router>
