@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
+from sqlalchemy import text, inspect
 from . import models, database
 from .database import engine, get_db
 
@@ -52,14 +53,34 @@ class TopicCreate(TopicBase):
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.get("/health")
-async def health_check():
+async def health_check(db: Session = Depends(get_db)):
     try:
         # Verifica conexão com o banco
-        db = next(get_db())
-        db.execute("SELECT 1")
-        return {"status": "healthy", "database": "connected"}
+        db.execute(text("SELECT 1"))
+        db.commit()
+        
+        # Verifica se as tabelas foram criadas
+        inspector = inspect(engine)
+        required_tables = {"ebooks", "chapters", "topics"}
+        existing_tables = set(inspector.get_table_names())
+        
+        if not required_tables.issubset(existing_tables):
+            missing_tables = required_tables - existing_tables
+            return {
+                "status": "error",
+                "detail": f"Missing tables: {missing_tables}"
+            }
+        
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "tables": list(existing_tables)
+        }
     except Exception as e:
-        raise HTTPException(status_code=503, detail=str(e))
+        raise HTTPException(
+            status_code=503,
+            detail=f"Database connection failed: {str(e)}"
+        )
 
 @app.post("/ebooks/")
 def create_ebook(ebook: EbookCreate, db: Session = Depends(get_db)):
