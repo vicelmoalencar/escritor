@@ -1,8 +1,8 @@
 build:
   type: dockerfile
   config:
-    dockerfile: Dockerfile
-    context: .
+    dockerfile: /frontend/Dockerfile
+    context: /frontend
 
 deploy:
   resources:
